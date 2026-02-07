@@ -1,6 +1,6 @@
 # EX 01-hello-vue
 
-![Exercise Image](./ex01-hello-vue/Screenshot 2026-02-06 235636.png)
+![Exercise Image](image-exo-1.png)
 
 1. What happens when you type in the input field? Why?
 When typing, `v-model` updates the reactive variable (the ref). Vue's reactivity system detects this change and triggers a re-render of the Virtual DOM, which then updates the actual DOM to reflect the new value.
