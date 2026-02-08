@@ -1,11 +1,4 @@
 <template>
-
-  <div @click="parentAction">
-    <h6>both button are in the same div the first on as no stop bubbling</h6>
-    <button @click="childrenAction">Click me</button>
-    <button @click.stop="childrenAction">Click me</button>
-  </div>
-
   <div class="counter-app"  @keyup.up="increment" @keyup.down="decrement" @keyup.space="reset" tabindex="0">
     <h1>Interactive Counter</h1>
 
@@ -44,32 +37,38 @@
 
     <div class="history">
       <ul>
-        <li v-for="(entry, index) in history" :key="index">{{index}} : {{entry}}</li>
+        <li v-for="(entry, index) in history" :key="index">{{ (history.length - 1) - index }} : {{ entry }}</li>
       </ul>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
-const count = ref(0)
+import { ref, watch} from 'vue'
+const props = defineProps(["id"])
+const counterId = `counter-${props.id}`
+const counter = JSON.parse(localStorage.getItem(counterId))
+
+const count = ref(counter?.count || 0)
 const targetGoal = ref(50)
 const customAmount = ref(0)
-const history = ref([])
+const history = ref(counter?.history || [])
 const stateHistory = ref([0])
 const redoState = ref([0])
 const warningMessage = ref('')
-const progressPercentage = ref(0)
 
+const progressPercentage = ref(counter?.progressPercentage || 0)
 
 const playSound = () => {
-  const audio = new Audio('.././universfield-animation-142973.mp3');
+  const audio = new Audio('/universfield-animation-142973.mp3');
   audio.play();
 }
 
 const updatePercentage = () => {
-  console.log(stateHistory.value[stateHistory.value.length - 1])
   progressPercentage.value = (count.value / targetGoal.value) * 100
+  watch(count, (newVal) => {
+    localStorage.setItem('count', JSON.stringify(newVal))
+  })
 }
 
 const clickHistory = (increment, value) => {
@@ -77,6 +76,7 @@ const clickHistory = (increment, value) => {
   stateHistory.value.push(value)
   const message = increment ? `Incremented by ${Math.abs(value)} at [${time}]` : `Decremented by ${Math.abs(value)} at [${time}]`
   history.value.push(message)
+  history.value.reverse()
 }
 
 const undo = () => {
@@ -87,15 +87,15 @@ const undo = () => {
     warningMessage.value = 'Limit reached!'
     return
   }
-  redoState.value.push(stateHistory.value.length - 1)
   const lastValue = stateHistory.value.pop()
+  redoState.value.push(lastValue)
   count.value -= lastValue
   history.value.pop()
   updatePercentage()
 }
 
 const redo = () => {
-  if (stateHistory.value.length <= 1) {
+  if (redoState.value.length <= 1) {
     return
   }
   if (count.value >= targetGoal.value || count.value <= 0) {
@@ -103,13 +103,11 @@ const redo = () => {
     return
   }
 
+  const lastValue = redoState.value.pop()
+  count.value += lastValue
 
-
-  const lastValue = redoState.value.length - 1
-  count.value += redoState.value.pop()
-
-  updatePercentage()
   lastValue > 0 ? clickHistory(true, lastValue) : clickHistory(false, lastValue)
+  updatePercentage()
 }
 
 const increment = () => {
@@ -121,8 +119,8 @@ const increment = () => {
 
   warningMessage.value = ''
   count.value++
-  updatePercentage()
   clickHistory(true, 1)
+  updatePercentage()
 }
 
 const incrementBy = (amount) => {
@@ -137,8 +135,8 @@ const incrementBy = (amount) => {
   }
   warningMessage.value = ''
   count.value += amount
-  updatePercentage()
   clickHistory(true, amount)
+  updatePercentage()
 }
 
 const decrement = () => {
@@ -149,8 +147,8 @@ const decrement = () => {
   playSound()
   warningMessage.value = ''
   count.value--
-  updatePercentage()
   clickHistory(false, -1)
+  updatePercentage()
 }
 
 const decrementBy = (amount) => {
@@ -160,18 +158,18 @@ const decrementBy = (amount) => {
   }
   warningMessage.value = ''
   count.value -= amount
-  updatePercentage()
   clickHistory(false, -5)
+  updatePercentage()
 }
 
 
 
 const reset = () => {
   count.value = 0
-  updatePercentage()
   history.value = []
   stateHistory.value = [0]
   warningMessage.value = ''
+  updatePercentage()
 }
 
 const parentAction = () => {
@@ -182,32 +180,171 @@ const childrenAction = () => {
   alert('You should only see this message cause not propagation arrive to the parent div who as a click event too')
 }
 
+watch([count, history, progressPercentage], () => {
+  const payload = {
+    count: count.value,
+    history: history.value,
+    progressPercentage: progressPercentage.value
+  }
+  localStorage.setItem(counterId, JSON.stringify(payload))
+}, {deep: true})
+
 </script>
 
 <style scoped>
 
-.progress-bar-container {
-  width: 300px;
-  height: 20px;
-  background-color: #4caf50;
+/* Main Card Styling */
+.counter-app {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: 1px solid #eaeaea;
 }
 
-.progress-bar {
-  height: 20px;
-  background-color: #c0392b;
+.counter-app:focus {
+  outline: 2px solid #3498db;
+  box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.2);
 }
 
+/* Typography */
+h1 {
+  font-size: 1.5rem;
+  margin: 0;
+  text-align: center;
+}
+
+h2 {
+  font-size: 2rem;
+  margin: 0;
+}
+
+h6 {
+  margin: 0 0 10px 0;
+  font-weight: normal;
+}
+
+/* Inputs & Labels */
+label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+input[type="number"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2px solid #ecf0f1;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+
+input[type="number"]:focus {
+  border-color: #3498db;
+  outline: none;
+}
+
+/* Display Section */
+.counter-display {
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+/* Control Groups */
+.controls, .advanced-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+/* Form */
+form {
+  display: flex;
+  gap: 10px;
+}
+
+button {
+  background-color: #27ae60;
+  color: white;
+  white-space: nowrap;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #2980b9;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* History */
+.history {
+  margin-top: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+.history ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  font-size: 0.85rem;
+  color: #7f8c8d;
+  min-height: 10vh;
+  max-height: 10vh;
+}
+
+.history li {
+  padding: 4px 0;
+  border-bottom: 1px dashed #f0f0f0;
+}
+
+/* Transitions */
 .slide-up-enter-active {
-  transition: all 0.2s ease-out;
+  transition: all 0.3s ease;
 }
 
 .slide-up-leave-active {
-  transition: all 0.2s cubic-bezier(1, 0.5, 0.8, 1);
+  transition: all 0.3s cubic-bezier(1, 0.5, 0.8, 1);
 }
 
 .slide-up-enter-from,
 .slide-up-leave-to {
-  transform: translateX(20px);
+  transform: translateY(20px);
   opacity: 0;
 }
+
+/* Progress Bar */
+.progress-bar-container {
+  height: 10px;
+  background-color: #e9ecef;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 15px 0;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #2ecc71;
+  border-radius: 10px;
+  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 </style>
