@@ -1,9 +1,18 @@
 <script setup>
 import { RouterView } from 'vue-router'
+import Sidebar from './components/Sidebar.vue'
+import { useAuthStore } from './stores/auth'
+
+const authStore = useAuthStore()
 </script>
 
 <template>
-  <RouterView />
+  <div class="app-layout">
+    <Sidebar v-if="authStore.isAuthenticated" />
+    <main :class="{ 'main-content': authStore.isAuthenticated }">
+      <RouterView />
+    </main>
+  </div>
 </template>
 
 <style>
@@ -17,5 +26,9 @@ body {
 
 * {
   box-sizing: border-box;
+}
+
+.main-content {
+  margin-left: 250px; /* Matches sidebar width */
 }
 </style>
