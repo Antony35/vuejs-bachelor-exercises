@@ -17,9 +17,9 @@ Create an admin dashboard for managing a fictional e-commerce platform. The dash
 Your dashboard MUST include:
 
 ### 1. Authentication
-- Login page with form validation
-- Protected routes (dashboard only accessible when logged in)
-- Logout functionality
+- ~~Login page with form validation~~
+- ~~Protected routes (dashboard only accessible when logged in)~~
+- ~~Logout functionality~~
 - Persistent authentication state
 
 ### 2. Dashboard Home

@@ -1,23 +1,24 @@
-# ex13-mini-project-dashboard
+# Vue 3 Mini Project - Admin Dashboard
 
-This template should help get you started developing with Vue 3 in Vite.
+## Project Overview
+This project is a simplified Admin Dashboard built with **Vue 3 (Composition API)**. It demonstrates core frontend concepts including authentication flow, state management, routing, and CRUD operations using a fake REST API.
 
-## Recommended IDE Setup
+## Features
+- **Authentication**: Fake login system using Pinia to manage user state.
+- **Protected Routes**: Users cannot access the Dashboard or Products page without logging in (Navigation Guards).
+- **Product Management (CRUD)**:
+  - **Read**: Fetches data from `fakestoreapi.com`.
+  - **Create**: Adds new products to the local state (uses a local placeholder image for new items).
+  - **Delete**: Removes products from the list.
+- **Responsive Layout**: Sidebar navigation that toggles based on auth state.
+- **Data Visualization**: Simple statistics on the dashboard.
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
-
-## Recommended Browser Setup
-
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
-
-## Customize configuration
-
-See [Vite Configuration Reference](https://vite.dev/config/).
+## Technologies Used
+- **Vue 3**: Composition API (`<script setup>`).
+- **Vite**: Build tool.
+- **Pinia**: State management (Stores for Auth and Products).
+- **Vue Router**: Single Page Application routing.
+- **CSS**: Custom scoped styles with transitions.
 
 ## Project Setup
 
@@ -25,20 +26,25 @@ See [Vite Configuration Reference](https://vite.dev/config/).
 npm install
 ```
 
-### Compile and Hot-Reload for Development
-
+### Run for Development
 ```sh
 npm run dev
-```
+``` 
 
-### Compile and Minify for Production
+## Key Concepts Learned
 
-```sh
-npm run build
-```
+### 1. State Management with Pinia 
+I learned how to move logic out of components and into Stores. 
+- auth.js: Manages isAuthenticated and user object.
+- products.js: Handles fetch, add, and delete logic. This makes the components cleaner and allows data to be shared easily. 
 
-### Lint with [ESLint](https://eslint.org/)
+### 2. Vue Router & Guards
+I implemented router to check requiresAuth. If a user isn't logged in, they are redirected to /login. This secures the application.
 
-```sh
-npm run lint
-```
+### 3. Async Data & Reactivity
+Using fetch inside Pinia actions allows the UI to update automatically. When products value changes in the store, the v-for loop in the view updates instantly without reloading the page. 
+
+### 4. Component Architecture 
+I separated the layout (Sidebar.vue) from the views (DashboardView.vue, ProductsView.vue). This makes the code reusable and easier to maintain. 
+
+Student Project for Vue.js Bachelor Course

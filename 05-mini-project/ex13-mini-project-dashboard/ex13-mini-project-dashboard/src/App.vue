@@ -21,10 +21,6 @@ const authStore = useAuthStore()
 
 <style>
 body {
-  margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f5f7fa;
   color: #2c3e50;
 }
 
